@@ -1,0 +1,24 @@
+.settings-heading {
+  padding: 1em 0;
+}
+
+.kintoneplugin-input-text {
+  width: 20em;
+}
+
+.block {
+  padding: 0 0 25px 50px;
+  width: 610px;
+  height: 150px;
+}
+
+.innerBlock {
+  float: left;
+  display: inline;
+  margin-right: 45px;
+}
+
+.kintoneplugin-title {
+  padding: 0 10px;
+  border-left: 10px solid #3498db;
+}

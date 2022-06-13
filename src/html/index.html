@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Google Map</title>
+  </head>
+  <style>
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+    body {
+      margin: 0px;
+      padding: 0px;
+    }
+  </style>
+  <body>
+    <div id="map"></div>
+  </body>
+</html>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrilHOKb6m1eFByHq7INOsfUx0JO5-nQk"></script>
+
+<script>
+  //Google map 安裝
+  let map = new google.maps.Map(document.getElementById('map'), {
+    center: {},
+    zoom: 0,
+  });
+
+  //Google Marker
+  const marker = new google.maps.Marker({
+    position: {lat: 25.0619576, lng: 121.5484069},
+    title: 'こちらです!~',
+    draggable: true,
+  });
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const pos = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+
+      const marker = new google.maps.Marker({
+        position: pos,
+      });
+      marker.setMap(map);
+      map.setCenter(pos);
+      map.setZoom(19);
+    });
+  }
+
+  // const popupContent = new google.maps.InfoWindow();
+
+  // google.maps.event.addListener(
+  //   marker,
+  //   'click',
+  //   (function (marker) {
+  //     return function () {
+  //       popupContent.setContent('エドワードエルリック！');
+  //       popupContent.open(map, marker);
+  //     };
+  //   })(marker)
+  // );
+
+  marker.setMap(map);
+</script>
