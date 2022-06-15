@@ -5,10 +5,11 @@
   const client = new KintoneRestAPIClient();
 
   // 獲取所有選項物件
-  const punchInTimeElement = document.getElementById("punch-in-time");
-  const punchInLocationElement = document.getElementById("punch-in-location");
-  const punchOutTimeElement = document.getElementById("punch-out-time");
-  const punchOutLocationElement = document.getElementById("punch-out-location");
+  const punchInTimeElement = document.getElementById("punch-in-time"); // 上班時間
+  const punchInLocationElement = document.getElementById("punch-in-location"); // 上班位置
+  const punchOutTimeElement = document.getElementById("punch-out-time"); // 下班時間
+  const punchOutLocationElement = document.getElementById("punch-out-location"); // 下班位置
+  const GoogleTokenElement = document.getElementById("GoogleToken"); // Google API使用權
   const saveBtn = document.getElementById("save");
   const cancelBtn = document.getElementById("cancel");
 
@@ -30,14 +31,15 @@
       punchInLocationElement.value = conf.punchInLocation;
       punchOutTimeElement.value = conf.punchOutTime;
       punchOutLocationElement.value = conf.punchOutLocation;
+      GoogleTokenElement.value =
+        conf.GoogleToken !== undefined ? conf.GoogleToken : "";
     }
   };
 
   // 新增選項到表單的欄位中
   const setElementPotions = () => {
-    const APP_ID = kintone.app.getId();
     const params = {
-      app: APP_ID,
+      app: kintone.app.getId(),
       preview: true,
     };
     return client.app
@@ -51,34 +53,36 @@
           const punchInTextElementOption = document.createElement("option"); // 上班地點(欄位選項)
           const punchOutTextElementOption = document.createElement("option"); // 下班地點(欄位選項)
           switch (prop.type) {
+            // 欄位類型為時間
             case "TIME":
               punchInTimeElementOption.setAttribute(
                 "value",
                 escapeHtml(prop.code)
               );
               punchInTimeElementOption.innerText = escapeHtml(prop.label);
+              punchInTimeElement.appendChild(punchInTimeElementOption);
 
               punchOutTimeElementOption.setAttribute(
                 "value",
                 escapeHtml(prop.code)
               );
               punchOutTimeElementOption.innerText = escapeHtml(prop.label);
-              punchInTimeElement.appendChild(punchInTimeElementOption);
               punchOutTimeElement.appendChild(punchOutTimeElementOption);
               break;
+            // 欄位類型為文字
             case "SINGLE_LINE_TEXT":
               punchInTextElementOption.setAttribute(
                 "value",
                 escapeHtml(prop.code)
               );
               punchInTextElementOption.innerText = escapeHtml(prop.label);
+              punchInLocationElement.appendChild(punchInTextElementOption);
 
               punchOutTextElementOption.setAttribute(
                 "value",
                 escapeHtml(prop.code)
               );
               punchOutTextElementOption.innerText = escapeHtml(prop.label);
-              punchInLocationElement.appendChild(punchInTextElementOption);
               punchOutLocationElement.appendChild(punchOutTextElementOption);
               break;
           }
@@ -106,7 +110,8 @@
       !punchInTimeElement.value ||
       !punchInLocationElement.value ||
       !punchOutTimeElement.value ||
-      !punchOutLocationElement.value
+      !punchOutLocationElement.value ||
+      !GoogleTokenElement.value
     ) {
       Swal.fire({
         icon: "error",
@@ -119,6 +124,7 @@
     config.punchInLocation = punchInLocationElement.value;
     config.punchOutTime = punchOutTimeElement.value;
     config.punchOutLocation = punchOutLocationElement.value;
+    config.GoogleToken = GoogleTokenElement.value;
     kintone.plugin.app.setConfig(config);
     return true;
   };
