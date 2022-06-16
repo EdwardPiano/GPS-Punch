@@ -10,5 +10,6 @@ module.exports = {
     Swal: false,
     $: false,
     jQuery: false,
+    google: false,
   },
 };
