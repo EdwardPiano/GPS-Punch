@@ -1,4 +1,4 @@
-function setHtmlStructure(config) {
+function setHtmlStructure() {
   const divTimeCard = document.getElementById("timeCard");
   divTimeCard.innerHTML = `<div class='showTimeSpace'>
     <div id="map"></div>
