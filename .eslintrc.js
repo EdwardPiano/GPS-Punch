@@ -11,5 +11,6 @@ module.exports = {
     $: false,
     jQuery: false,
     google: false,
+    setHtmlStructure: false,
   },
 };

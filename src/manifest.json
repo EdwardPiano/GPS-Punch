@@ -6,7 +6,6 @@
     "js": [
       "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
       "https://unpkg.com/@kintone/rest-api-client@3.1.2/umd/KintoneRestAPIClient.min.js",
-      "https://maps.googleapis.com/maps/api/js?key=AIzaSyCrilHOKb6m1eFByHq7INOsfUx0JO5-nQk",
       "js/moment-with-locales.js",
       "js/desktop.js",
       "js/UIsetting.js"
