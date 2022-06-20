@@ -3,16 +3,16 @@
 }
 
 .kintoneplugin-input-text {
-  width: 20em;
+  width: 16em;
 }
 
 .block {
-  padding: 0 0 15px 30px;
-  width: 610px;
-  height: 130px;
+  width: 660px;
+  height: auto;
 }
 
 .innerBlock {
+  margin-top: 36px;
   float: left;
   display: inline;
   margin-right: 45px;
@@ -21,4 +21,8 @@
 .kintoneplugin-title {
   padding: 0 10px;
   border-left: 10px solid #3498db;
+}
+
+#cancel {
+  margin-right: 20px;
 }

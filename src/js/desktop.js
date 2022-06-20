@@ -1,9 +1,22 @@
 (function (PLUGIN_ID) {
   "use strict";
+  const config = kintone.plugin.app.getConfig(PLUGIN_ID);
+  let locationAddress = null;
+  // 取得外掛後台設定值
+  const punchUserFieldCode = config.punchUser;
+  const punchDateFieldCode = config.punchDate;
+  const punchinTimeFieldCode = config.punchInTime;
+  const punchOutTimeFieldCode = config.punchOutTime;
+  const punchinLocationFieldCode = config.punchInLocation;
+  const punchOutLocationFieldCode = config.punchOutLocation;
+  const client = new KintoneRestAPIClient();
   let timeout = 10 * 1000; // ms
   const interval = 100; // ms
-  kintone.events.on("app.record.index.show", function () {
-    const config = kintone.plugin.app.getConfig(PLUGIN_ID);
+  kintone.events.on("app.record.index.show", function (event) {
+    const loginUserCode = kintone.getLoginUser().code;
+    if (String(event.viewId) !== config.listID) {
+      return event;
+    }
     setHtmlStructure(); // 設定打卡畫面
     function load(src) {
       const head = document.getElementsByTagName("head")[0];
@@ -50,6 +63,7 @@
       const map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 0, lng: 0 },
         zoom: 0,
+        streetViewControl: true,
       });
 
       const geocoder = new google.maps.Geocoder();
@@ -77,7 +91,7 @@
                   title: String(results[0].formatted_address),
                   draggable: true,
                 });
-
+                locationAddress = results[0].formatted_address;
                 const popupContent = new google.maps.InfoWindow();
                 google.maps.event.addListener(
                   marker,
@@ -91,7 +105,7 @@
                 );
                 marker.setMap(map);
                 map.setCenter(pos);
-                map.setZoom(19);
+                map.setZoom(16);
                 google.maps.event.trigger(marker, "click", {}); // 啟動後自動顯示當前地址(popupContent)
               }
             }
@@ -106,11 +120,107 @@
 
     btnPunchIn.onclick = () => {
       // 查看是否已經打過上班卡
-
-      alert("OK");
+      client.record
+        .getAllRecords({
+          app: kintone.app.getId(),
+          condition: `${punchUserFieldCode} in("${loginUserCode}") and ${punchDateFieldCode} =TODAY()`,
+        })
+        // 刷地圖、更新當前所在位置
+        .then((resp) => {
+          setLocationAddress();
+          return resp;
+        })
+        .then((resp) => {
+          if (resp.length !== 0) {
+            throw new Error("今日已打過上班卡");
+          }
+          const params = {
+            app: kintone.app.getId(),
+            record: {
+              [punchUserFieldCode]: {
+                value: [
+                  {
+                    code: loginUserCode,
+                  },
+                ],
+              },
+              [punchDateFieldCode]: {
+                value: moment().format("YYYY-MM-DD"),
+              },
+              [punchinTimeFieldCode]: {
+                value: moment().format("HH:mm"),
+              },
+              [punchinLocationFieldCode]: {
+                value: locationAddress,
+              },
+            },
+          };
+          client.record.addRecord(params);
+        })
+        .then(() => {
+          Swal.fire({
+            icon: "success",
+            title: "成功完成打卡",
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        })
+        .catch((error) => {
+          Swal.fire({
+            icon: "warning",
+            title: error.message,
+          });
+          console.error(error.message);
+        });
     };
     btnPunchOut.onclick = () => {
-      alert("OK!!");
+      // 查看是否已經打過下班卡
+      client.record
+        .getAllRecords({
+          app: kintone.app.getId(),
+          condition: `${punchUserFieldCode} in("${loginUserCode}") and ${punchDateFieldCode} =TODAY()`,
+        })
+        // 刷地圖、更新當前所在位置
+        .then((resp) => {
+          setLocationAddress();
+          return resp;
+        })
+        .then((resp) => {
+          if (resp.length === 0) {
+            throw new Error("今日未打上班卡");
+          } else if (resp[0][punchOutTimeFieldCode].value) {
+            throw new Error("今日已打過下班卡");
+          }
+          const params = {
+            app: kintone.app.getId(),
+            id: resp[0].$id.value,
+            record: {
+              [punchOutTimeFieldCode]: {
+                value: moment().format("HH:mm"),
+              },
+              [punchOutLocationFieldCode]: {
+                value: locationAddress,
+              },
+            },
+          };
+          client.record.updateRecord(params);
+        })
+        .then(() => {
+          Swal.fire({
+            icon: "success",
+            title: "成功完成打卡",
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        })
+        .catch((error) => {
+          Swal.fire({
+            icon: "warning",
+            title: error.message,
+          });
+          console.error(error.message);
+        });
     };
+    return event;
   });
 })(kintone.$PLUGIN_ID);

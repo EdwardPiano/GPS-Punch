@@ -5,10 +5,13 @@
   const client = new KintoneRestAPIClient();
 
   // 獲取所有選項物件
+  const punchUserElement = document.getElementById("userSelection"); // 打卡user
+  const punchDateElement = document.getElementById("punchDate"); // 打卡日期
   const punchInTimeElement = document.getElementById("punch-in-time"); // 上班時間
   const punchInLocationElement = document.getElementById("punch-in-location"); // 上班位置
   const punchOutTimeElement = document.getElementById("punch-out-time"); // 下班時間
   const punchOutLocationElement = document.getElementById("punch-out-location"); // 下班位置
+  const listIDElement = document.getElementById("listID"); // 一覽表ID
   const GoogleTokenElement = document.getElementById("GoogleToken"); // Google API使用權
   const saveBtn = document.getElementById("save");
   const cancelBtn = document.getElementById("cancel");
@@ -27,10 +30,13 @@
   const setDefault = () => {
     const conf = kintone.plugin.app.getConfig(PLUGIN_ID);
     if (conf) {
+      punchUserElement.value = conf.punchUser;
+      punchDateElement.value = conf.punchDate;
       punchInTimeElement.value = conf.punchInTime;
       punchInLocationElement.value = conf.punchInLocation;
       punchOutTimeElement.value = conf.punchOutTime;
       punchOutLocationElement.value = conf.punchOutLocation;
+      listIDElement.value = conf.listID !== undefined ? conf.listID : "";
       GoogleTokenElement.value =
         conf.GoogleToken !== undefined ? conf.GoogleToken : "";
     }
@@ -48,6 +54,8 @@
         console.log(resp);
         for (const key of Object.keys(resp.properties)) {
           const prop = resp.properties[key];
+          const punchUserOption = document.createElement("option"); // 打卡使用者(欄位選項)
+          const punchDateOption = document.createElement("option"); // 打卡日期(欄位選項)
           const punchInTimeElementOption = document.createElement("option"); // 上班時間(欄位選項)
           const punchOutTimeElementOption = document.createElement("option"); // 下班時間(欄位選項)
           const punchInTextElementOption = document.createElement("option"); // 上班地點(欄位選項)
@@ -69,6 +77,11 @@
               punchOutTimeElementOption.innerText = escapeHtml(prop.label);
               punchOutTimeElement.appendChild(punchOutTimeElementOption);
               break;
+            case "DATE":
+              punchDateOption.setAttribute("value", escapeHtml(prop.code));
+              punchDateOption.innerText = escapeHtml(prop.label);
+              punchDateElement.appendChild(punchDateOption);
+              break;
             // 欄位類型為文字
             case "SINGLE_LINE_TEXT":
               punchInTextElementOption.setAttribute(
@@ -84,6 +97,12 @@
               );
               punchOutTextElementOption.innerText = escapeHtml(prop.label);
               punchOutLocationElement.appendChild(punchOutTextElementOption);
+              break;
+            // 欄位類行為選擇使用者
+            case "USER_SELECT":
+              punchUserOption.setAttribute("value", escapeHtml(prop.code));
+              punchUserOption.innerHTML = escapeHtml(prop.label);
+              punchUserElement.appendChild(punchUserOption);
               break;
           }
         }
@@ -107,10 +126,13 @@
   saveBtn.onclick = () => {
     const config = {};
     if (
+      !punchUserElement.value ||
+      !punchDateElement.value ||
       !punchInTimeElement.value ||
       !punchInLocationElement.value ||
       !punchOutTimeElement.value ||
       !punchOutLocationElement.value ||
+      !listIDElement.value ||
       !GoogleTokenElement.value
     ) {
       Swal.fire({
@@ -120,10 +142,13 @@
       });
       return false;
     }
+    config.punchUser = punchUserElement.value;
+    config.punchDate = punchDateElement.value;
     config.punchInTime = punchInTimeElement.value;
     config.punchInLocation = punchInLocationElement.value;
     config.punchOutTime = punchOutTimeElement.value;
     config.punchOutLocation = punchOutLocationElement.value;
+    config.listID = listIDElement.value;
     config.GoogleToken = GoogleTokenElement.value;
     kintone.plugin.app.setConfig(config);
     return true;
