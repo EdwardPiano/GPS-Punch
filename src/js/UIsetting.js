@@ -1,8 +1,7 @@
 function setHtmlStructure() {
   const divTimeCard = document.getElementById("timeCard");
-  divTimeCard.innerHTML = `<div class='showTimeSpace'>
+  divTimeCard.innerHTML = `
     <div id="map"></div>
-  </div>
     <div class='showTimeSpace'>
     <div id='date'></div>
     <div id='time'></div>

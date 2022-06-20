@@ -17,7 +17,9 @@
     if (String(event.viewId) !== config.listID) {
       return event;
     }
-    setHtmlStructure(); // 設定打卡畫面
+    // 設定打卡畫面
+    setHtmlStructure();
+    // 載入 API key
     function load(src) {
       const head = document.getElementsByTagName("head")[0];
       const script = document.createElement("script");
@@ -43,21 +45,43 @@
       }, interval);
     }
     // 導入Google Map API
-    load("https://maps.googleapis.com/maps/api/js?key=" + config.GoogleToken);
+    load(`https://maps.googleapis.com/maps/api/js?key=${config.GoogleToken}`);
     waitLoaded();
-
     // 取的畫面元素
     const btnPunchIn = document.getElementById("punchIn"); // 上班按鈕
     const btnPunchOut = document.getElementById("punchOut"); // 下班按鈕
     const showDateSpace = document.getElementById("date"); // 顯示日期位置
     const showTimeSpace = document.getElementById("time"); // 顯示時間位置
-
+    // 回傳星期幾
+    function getDayInWeek() {
+      const day = moment(new Date()).day();
+      switch (day) {
+        case 1:
+          return "一";
+        case 2:
+          return "二";
+        case 3:
+          return "三";
+        case 4:
+          return "四";
+        case 5:
+          return "五";
+        case 6:
+          return "六";
+        case 0:
+          return "日";
+      }
+    }
+    // 設定顯示時間、日期
     function setTime() {
-      showDateSpace.innerText = moment().format("YYYY/MM/DD");
+      showDateSpace.innerText = `${moment().format(
+        "YYYY/MM/DD"
+      )} (${getDayInWeek()})`;
       showTimeSpace.innerText = moment().format("HH:mm:ss");
     }
     setInterval(setTime, 1000);
 
+    // 定位並顯示至google map上
     function setLocationAddress() {
       // Google Map 顯示
       const map = new google.maps.Map(document.getElementById("map"), {
@@ -118,6 +142,7 @@
       }
     }
 
+    // 打卡按鈕(上班)
     btnPunchIn.onclick = () => {
       // 查看是否已經打過上班卡
       client.record
@@ -173,6 +198,8 @@
           console.error(error.message);
         });
     };
+
+    // 打卡按鈕(下班)
     btnPunchOut.onclick = () => {
       // 查看是否已經打過下班卡
       client.record

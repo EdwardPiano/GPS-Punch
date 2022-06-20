@@ -14,11 +14,6 @@ div.showTimeSpace {
   background: #000000;
   color: #000000;
 }
-div.showTimeSpace div {
-  display: inline-block;
-  text-align: center;
-  height: auto;
-}
 #date {
   color: #ffffff;
   font-size: 30px;
